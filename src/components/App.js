@@ -4,13 +4,13 @@ import { authService } from "../myFirebase";
 
 function App() {
     const [init, setInit] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userObj, setUserObj] = useState(null);
     useEffect(() => {
         authService.onAuthStateChanged((user) => {
+            //로그인 로그아웃 & 초기화 될 때 발동 된다
             if (user) {
-                setIsLoggedIn(true);
+                setUserObj(user);
             } else {
-                setIsLoggedIn(false);
             }
             setInit(true);
         });
@@ -18,7 +18,7 @@ function App() {
     return (
         <>
             {init ? (
-                <AppRouter isLoggedIn={isLoggedIn} />
+                <AppRouter isLoggedIn={Boolean(userObj)} userObj={userObj} />
             ) : (
                 "Initializing ....."
             )}
