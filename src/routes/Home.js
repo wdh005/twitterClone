@@ -1,21 +1,18 @@
 import React, { useEffect, useState } from "react";
+import Tweet from "../components/Tweet";
 import { dbService } from "../myFirebase";
 
-const Home = () => {
+const Home = ({ userObj }) => {
     const [tweet, setTweet] = useState("");
     const [tweets, setTweets] = useState([]);
-    const getTweets = async () => {
-        const dbTweets = await dbService.collection("tweets").get();
-        dbTweets.forEach((document) => {
-            const tweetObject = {
-                ...document.data(),
-                id: document.id,
-            };
-            setTweets((prev) => [tweetObject, ...prev]);
-        });
-    };
     useEffect(() => {
-        getTweets();
+        dbService.collection("tweets").onSnapshot((snapshot) => {
+            const tweetArray = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setTweets(tweetArray);
+        });
     }, []);
     const onChange = (event) => {
         const {
@@ -26,8 +23,9 @@ const Home = () => {
     const onSubmit = async (event) => {
         event.preventDefault();
         await dbService.collection("tweets").add({
-            tweet,
+            text: tweet,
             createdAt: Date.now(),
+            creatorId: userObj.uid,
         });
         setTweet("");
     };
@@ -45,9 +43,11 @@ const Home = () => {
             </form>
             <div key={tweet.id}>
                 {tweets.map((tweet) => (
-                    <div>
-                        <h4>{tweet.tweet}</h4>
-                    </div>
+                    <Tweet
+                        ket={tweet.id}
+                        tweetObj={tweet}
+                        isOwner={tweet.creatorId === userObj.uid}
+                    />
                 ))}
             </div>
         </div>
