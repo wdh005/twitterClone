@@ -9,16 +9,31 @@ function App() {
         authService.onAuthStateChanged((user) => {
             //로그인 로그아웃 & 초기화 될 때 발동 된다
             if (user) {
-                setUserObj(user);
-            } else {
+                setUserObj({
+                    displayName: user.displayName,
+                    uid: user.uid,
+                    updateProfile: (args) => user.updateProfile(args),
+                });
             }
             setInit(true);
         });
     }, []);
+    const refreshUser = () => {
+        const user = authService.currentUser;
+        setUserObj({
+            displayName: user.displayName,
+            uid: user.uid,
+            updateProfile: (args) => user.updateProfile(args),
+        });
+    };
     return (
         <>
             {init ? (
-                <AppRouter isLoggedIn={Boolean(userObj)} userObj={userObj} />
+                <AppRouter
+                    refreshUser={refreshUser}
+                    isLoggedIn={Boolean(userObj)}
+                    userObj={userObj}
+                />
             ) : (
                 "Initializing ....."
             )}
